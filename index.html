@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muhammed Hanan — Web Developer | Kerala, India</title>
+  <meta name="description" content="Web developer from Calicut, India. I build custom websites, WordPress and WooCommerce sites for international businesses. Available for new projects.">
+  <meta name="author" content="Muhammed Hanan">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://hanan.in">
+  <meta property="og:title" content="Muhammed Hanan — Web Developer | Kerala, India">
+  <meta property="og:description" content="Web developer from Calicut, India. I build custom websites, WordPress and WooCommerce sites for international businesses. Available for new projects.">
+  <meta property="og:image" content="https://hanan.in/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://hanan.in">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Favicons: SVG for modern browsers, PNG fallback, Apple touch icon -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <!-- display font is self-hosted (@font-face in style.css) so it renders
+       identically everywhere — no third-party CDN that can be blocked/slow -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/general-sans-600.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/general-sans-700.woff2">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="style.css?v=26">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GLTFLoader for the 3D hand — same three r128 line, URL verified live -->
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <!-- Lenis moved from @studio-freight/lenis to the `lenis` package; URL verified live 2026-07-05 -->
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
+  <script defer src="main.js?v=13"></script>
+  <script defer src="globe-data.js?v=1"></script>
+  <script defer src="globe.js?v=19"></script>
+  <script defer src="hero-dots.js?v=7"></script>
+  <script defer src="hand-scene.js?v=21"></script>
+</head>
+<body id="top">
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Loading screen: hidden until Phase 2 JS adds .js to <html>; counter final value lives in HTML -->
+  <div class="loading-screen" id="loading-screen" aria-hidden="true">
+    <div class="loading-ring-wrap">
+      <svg class="loading-ring" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+        <circle class="ring-track" cx="60" cy="60" r="54"></circle>
+        <circle class="ring-fill" cx="60" cy="60" r="54"></circle>
+      </svg>
+      <span class="loading-count" id="loading-count">0%</span>
+    </div>
+  </div>
+
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#top" aria-label="MH — back to top">MH</a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#work">Work</a></li>
+          <li><a class="nav-link" href="#services">Services</a></li>
+          <li><a class="nav-link" href="#about">About</a></li>
+          <li><a class="nav-link" href="#contact">Contact</a></li>
+        </ul>
+        <a class="btn btn-glass nav-cta" href="#contact">Let&#8217;s talk</a>
+      </nav>
+
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="nav-toggle-line" aria-hidden="true"></span>
+        <span class="nav-toggle-line" aria-hidden="true"></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Persistent decorative hands (sections 1–5; second hand revealed at Contact in Phase 2) -->
+  <div class="hands-layer" aria-hidden="true">
+    <div class="hand hand-left">
+      <svg class="hand-svg" viewBox="0 0 220 470" fill="none" focusable="false" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="78"  y="30"  width="36" height="200" rx="18"></rect>
+          <rect x="120" y="150" width="32" height="58"  rx="15"></rect>
+          <rect x="152" y="162" width="30" height="52"  rx="14"></rect>
+          <rect x="180" y="176" width="26" height="46"  rx="12"></rect>
+          <rect x="66"  y="200" width="126" height="140" rx="46"></rect>
+          <rect x="30"  y="196" width="34" height="110" rx="17" transform="rotate(24 47 251)"></rect>
+          <path d="M84 340 C84 392 82 424 78 460"></path>
+          <path d="M176 340 C176 392 178 424 182 460"></path>
+        </g>
+      </svg>
+    </div>
+    <div class="hand hand-right">
+      <svg class="hand-svg" viewBox="0 0 220 470" fill="none" focusable="false" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="78"  y="30"  width="36" height="200" rx="18"></rect>
+          <rect x="120" y="150" width="32" height="58"  rx="15"></rect>
+          <rect x="152" y="162" width="30" height="52"  rx="14"></rect>
+          <rect x="180" y="176" width="26" height="46"  rx="12"></rect>
+          <rect x="66"  y="200" width="126" height="140" rx="46"></rect>
+          <rect x="30"  y="196" width="34" height="110" rx="17" transform="rotate(24 47 251)"></rect>
+          <path d="M84 340 C84 392 82 424 78 460"></path>
+          <path d="M176 340 C176 392 178 424 182 460"></path>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <main id="main">
+
+    <!-- SECTION 0 — GLOBE (no text, no labels; canvas mounted by globe.js in Phase 2) -->
+    <section class="globe-section" id="globe" aria-label="Interactive globe">
+      <div class="globe-canvas" id="globe-canvas"></div>
+      <!-- scroll cue: cascading chevrons, fades out once scrolling begins -->
+      <div class="scroll-cue" id="scroll-cue" aria-hidden="true">
+        <span class="cue-label">Scroll</span>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="globe-fade" aria-hidden="true"></div>
+    </section>
+
+    <!-- SECTION 1 — HERO -->
+    <section class="hero" id="hero">
+      <!-- cursor-reactive dot field (hero-dots.js) -->
+      <div class="hero-dots" id="hero-dots" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="tag-line">Web Developer &middot; Kerala, India</p>
+          <h1 class="hero-headline" id="hero-headline">Hello, I'm Hanan.</h1>
+          <p class="hero-sub">I build websites for businesses that want to be found — and remembered.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-glass btn-primary" href="#work">See my work</a>
+            <a class="btn-text" href="#contact">Let's talk &rarr;</a>
+          </div>
+          <p class="trust-line">Based in Calicut, India &middot; Serving clients globally</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 — WORK -->
+    <section class="section work" id="work">
+      <div class="container">
+        <p class="section-label">01 / WORK</p>
+        <h2 class="section-heading">Built for the real world.</h2>
+
+        <div class="work-grid">
+          <article class="glass-card project-card">
+            <p class="project-label">E-COMMERCE &middot; DUBAI &middot; 2025</p>
+            <h3 class="project-name">AL AHRAR Auto Spare Parts</h3>
+            <p class="project-desc">A premium dark WooCommerce website for a Dubai-based auto spare parts wholesaler. Custom dark design system, interactive 3D engine animation, WhatsApp enquiry integration, brand/model filtering, and full on-page SEO.</p>
+            <ul class="tag-list" aria-label="Technologies and highlights">
+              <li class="tag-pill">WordPress</li>
+              <li class="tag-pill">WooCommerce</li>
+              <li class="tag-pill">SEO</li>
+              <li class="tag-pill">Dubai</li>
+              <li class="tag-pill">Premium Design</li>
+            </ul>
+            <a class="btn btn-glass project-link" href="https://alahrarautomotive.com" target="_blank" rel="noopener">Visit alahrarautomotive.com &rarr;</a>
+            <p class="project-result">Live, indexed, and ranking for &lsquo;auto spare parts Dubai&rsquo;</p>
+          </article>
+
+          <article class="glass-card project-card">
+            <p class="project-label">LADIES PG &middot; BANGALORE &middot; 2026</p>
+            <h3 class="project-name">AMIGO Living &amp; Luxury</h3>
+            <p class="project-desc">A custom WordPress theme for a ladies-only PG accommodation brand in Bangalore. Room types with transparent pricing, amenities showcase, two branch locations, WhatsApp booking integration, and on-page SEO.</p>
+            <ul class="tag-list" aria-label="Technologies and highlights">
+              <li class="tag-pill">WordPress</li>
+              <li class="tag-pill">Custom Theme</li>
+              <li class="tag-pill">SEO</li>
+              <li class="tag-pill">Bangalore</li>
+              <li class="tag-pill">Hospitality</li>
+            </ul>
+            <a class="btn btn-glass project-link" href="https://amigoliving.com" target="_blank" rel="noopener">Visit amigoliving.com &rarr;</a>
+            <p class="project-result">Live and indexed on Google</p>
+          </article>
+
+          <article class="glass-card project-card">
+            <p class="project-label">UNIFORMS &middot; RIYADH &middot; 2026</p>
+            <h3 class="project-name">Diya Uniforms</h3>
+            <p class="project-desc">A WordPress site for a Riyadh-based uniform manufacturer supplying corporate, hospitality, healthcare, industrial and aviation clients. Eleven sector collections each with their own quote request, WhatsApp enquiry integration, and full on-page SEO.</p>
+            <ul class="tag-list" aria-label="Technologies and highlights">
+              <li class="tag-pill">WordPress</li>
+              <li class="tag-pill">Elementor</li>
+              <li class="tag-pill">SEO</li>
+              <li class="tag-pill">Saudi Arabia</li>
+              <li class="tag-pill">Catalog Site</li>
+            </ul>
+            <a class="btn btn-glass project-link" href="https://diyauniform.com" target="_blank" rel="noopener">Visit diyauniform.com &rarr;</a>
+            <p class="project-result">Live &mdash; eleven sector collections, each with its own quote flow</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3 — SERVICES -->
+    <section class="section services" id="services">
+      <div class="container">
+        <p class="section-label">02 / SERVICES</p>
+        <h2 class="section-heading">What I do.</h2>
+
+        <div class="services-grid">
+          <article class="glass-card service-card">
+            <span class="accent-line" aria-hidden="true"></span>
+            <h3 class="service-title">Web Design &amp; Development</h3>
+            <p class="service-desc">Custom websites built to look premium and perform fast. No templates — every site is designed and built from scratch.</p>
+          </article>
+          <article class="glass-card service-card">
+            <span class="accent-line" aria-hidden="true"></span>
+            <h3 class="service-title">WooCommerce &amp; Product Catalogs</h3>
+            <p class="service-desc">Product catalog sites, enquiry-based shops, and WooCommerce builds for businesses that sell online or need to showcase inventory.</p>
+          </article>
+          <article class="glass-card service-card">
+            <span class="accent-line" aria-hidden="true"></span>
+            <h3 class="service-title">On-Page SEO Setup</h3>
+            <p class="service-desc">Keyword research, meta titles, structured data, sitemap submission, and Google Search Console connection — so your site gets found from day one.</p>
+          </article>
+          <article class="glass-card service-card">
+            <span class="accent-line" aria-hidden="true"></span>
+            <h3 class="service-title">Website Maintenance</h3>
+            <p class="service-desc">Ongoing updates, bug fixes, content changes, and plugin management. Monthly retainer available.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 — ABOUT -->
+    <section class="section about" id="about">
+      <div class="container">
+        <p class="section-label">03 / ABOUT</p>
+        <h2 class="section-heading">The person behind the work.</h2>
+
+        <div class="about-body">
+          <p>I'm Muhammed Hanan, a web developer from Calicut, Kerala. I completed my BCA from SEA College, Bengaluru North University in 2025 and did my internship at NestSoft Technologies.</p>
+          <p>I build custom websites, WordPress and WooCommerce sites for international businesses — primarily in the GCC, UK, and US — who want sites that actually work: fast, well-designed, and built to rank on Google.</p>
+          <p>My process combines custom design, clean code, and real SEO setup so every site I deliver is ready to attract customers from day one.</p>
+        </div>
+
+        <h2 class="about-tagline">Working toward one title: best web developer in Kerala.</h2>
+
+        <a class="btn-text about-cta" href="#contact">Want to work together? &rarr;</a>
+      </div>
+    </section>
+
+    <!-- SECTION 5 — TESTIMONIAL -->
+    <section class="section testimonial" id="testimonial">
+      <div class="container">
+        <p class="section-label">04 / WHAT CLIENTS SAY</p>
+
+        <figure class="glass-card quote-card">
+          <blockquote class="quote-text">
+            <p>Yes, it looks nice, and you did very well and mentioned in detail each profile of the business.</p>
+          </blockquote>
+          <figcaption class="quote-attr">— Client, Dubai Auto Spare Parts Business, 2026</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- SECTION 6 — CONTACT (hands meet around the connect button) -->
+    <section class="section contact" id="contact">
+      <div class="container">
+        <p class="section-label">05 / CONTACT</p>
+        <h2 class="section-heading">Let's build something.</h2>
+        <p class="contact-sub">Available for new projects. Based in India, working globally.</p>
+
+        <!-- stage: the connect button sits between the two index fingertips -->
+        <div class="contact-stage">
+          <a class="connect-btn" id="connect-btn" href="https://wa.me/919995221017?text=Hi%20Hanan%2C%20I%27d%20like%20to%20discuss%20a%20web%20project." target="_blank" rel="noopener">
+            <span class="connect-btn-label">Let's talk</span>
+          </a>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-options">
+            <a class="glass-card contact-card contact-primary" href="https://wa.me/919995221017?text=Hi%20Hanan%2C%20I%27d%20like%20to%20discuss%20a%20web%20project." target="_blank" rel="noopener">
+              <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z"></path>
+                <path d="M8.8 8.6c.2-.5.5-.5.8-.5h.7c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.4 0 .6.5.9 1.4 1.8 2.4 2.3.2.1.4.1.6-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.3.4.5v.8c0 .3-.2.6-.5.7-.6.3-1.4.4-2.2.1-1.6-.5-3.3-1.7-4.5-3.3-.7-1-1.3-2.2-1.3-3.3 0-.4.1-.8.2-1z"></path>
+              </svg>
+              <span class="contact-meta">
+                <span class="contact-label">WhatsApp</span>
+                <span class="contact-value">+91 99952 21017</span>
+              </span>
+            </a>
+
+            <a class="glass-card contact-card" href="mailto:muhammedhanan999@gmail.com">
+              <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="14" rx="3"></rect>
+                <path d="M3.5 7l8.5 6 8.5-6"></path>
+              </svg>
+              <span class="contact-meta">
+                <span class="contact-label">Email</span>
+                <span class="contact-value">muhammedhanan999@gmail.com</span>
+              </span>
+            </a>
+
+            <a class="glass-card contact-card" href="https://www.linkedin.com/in/muhammed-hanan-4a5008374" target="_blank" rel="noopener">
+              <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                <circle cx="8.2" cy="8.4" r="0.5"></circle>
+                <path d="M8.2 11.2v5.4"></path>
+                <path d="M12.2 16.6v-5.4"></path>
+                <path d="M12.2 13.4c0-1.3 1-2.3 2.2-2.3s2.1 1 2.1 2.3v3.2"></path>
+              </svg>
+              <span class="contact-meta">
+                <span class="contact-label">LinkedIn</span>
+                <span class="contact-value">linkedin.com/in/muhammed-hanan-4a5008374</span>
+              </span>
+            </a>
+
+            <a class="glass-card contact-card" href="https://instagram.com/_hanan_mhd" target="_blank" rel="noopener">
+              <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                <circle cx="12" cy="12" r="4"></circle>
+                <circle cx="17.2" cy="6.8" r="0.6"></circle>
+              </svg>
+              <span class="contact-meta">
+                <span class="contact-label">Instagram</span>
+                <span class="contact-value">@_hanan_mhd</span>
+              </span>
+            </a>
+          </div>
+
+          <div class="contact-message">
+            <p>I typically respond within 24 hours. Whether you have a full brief or just an idea — reach out and let's talk about what you need.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="footer-copy">&copy; 2026 Muhammed Hanan. All rights reserved.</p>
+      <p class="footer-logo" aria-hidden="true">MH</p>
+      <ul class="footer-social" aria-label="Social links">
+        <li>
+          <a class="footer-social-link" href="https://www.linkedin.com/in/muhammed-hanan-4a5008374" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+              <circle cx="8.2" cy="8.4" r="0.5"></circle>
+              <path d="M8.2 11.2v5.4"></path>
+              <path d="M12.2 16.6v-5.4"></path>
+              <path d="M12.2 13.4c0-1.3 1-2.3 2.2-2.3s2.1 1 2.1 2.3v3.2"></path>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a class="footer-social-link" href="https://instagram.com/_hanan_mhd" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+              <circle cx="12" cy="12" r="4"></circle>
+              <circle cx="17.2" cy="6.8" r="0.6"></circle>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a class="footer-social-link" href="https://wa.me/919995221017?text=Hi%20Hanan%2C%20I%27d%20like%20to%20discuss%20a%20web%20project." target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+              <path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z"></path>
+              <path d="M8.8 8.6c.2-.5.5-.5.8-.5h.7c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.4 0 .6.5.9 1.4 1.8 2.4 2.3.2.1.4.1.6-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.3.4.5v.8c0 .3-.2.6-.5.7-.6.3-1.4.4-2.2.1-1.6-.5-3.3-1.7-4.5-3.3-.7-1-1.3-2.2-1.3-3.3 0-.4.1-.8.2-1z"></path>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Phase 2: main.js + globe.js · Phase 3: hero-animation.js — added after review -->
+
+</body>
+</html>

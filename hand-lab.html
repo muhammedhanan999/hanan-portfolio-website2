@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Hand particle lab — hover interactions</title>
+<style>
+  @font-face{font-family:'General Sans';src:url('assets/fonts/general-sans-600.woff2') format('woff2');font-weight:600;font-display:swap}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#000;color:#F0F2F5;font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+  #stage{position:fixed;inset:0;z-index:0;cursor:crosshair}
+  .panel{position:fixed;z-index:2;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:14px;padding:16px 18px}
+  #modes{top:20px;left:20px;max-width:330px}
+  #ctrls{bottom:20px;left:20px;width:330px}
+  h1{font-family:'General Sans',system-ui,sans-serif;font-weight:600;font-size:15px;letter-spacing:.01em;margin-bottom:3px}
+  .sub{color:#8B929E;font-size:11.5px;margin-bottom:13px;line-height:1.45}
+  button.mode{display:block;width:100%;text-align:left;background:transparent;border:1px solid rgba(255,255,255,.12);
+    color:#F0F2F5;border-radius:9px;padding:9px 11px;margin-bottom:6px;cursor:pointer;font:inherit;font-size:12.5px;
+    transition:background .18s,border-color .18s}
+  button.mode:hover{background:rgba(255,255,255,.07)}
+  button.mode.on{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.42)}
+  button.mode b{display:block;font-weight:600;margin-bottom:1px}
+  button.mode span{color:#8B929E;font-size:11px;line-height:1.35;display:block}
+  .row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .row label{width:78px;color:#8B929E;font-size:11.5px;flex:none}
+  .row input[type=range]{flex:1;accent-color:#F0F2F5;height:3px}
+  .row output{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-size:11.5px;color:#8B929E}
+  .hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;color:#8B929E;font-size:12px;
+    letter-spacing:.02em;pointer-events:none;text-align:center}
+  #err{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;color:#8B929E;text-align:center;display:none}
+  #copy{margin-top:11px;width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#F0F2F5;
+    border-radius:9px;padding:9px;cursor:pointer;font:inherit;font-size:12px}
+  #copy:hover{background:rgba(255,255,255,.16)}
+  @media(max-width:900px){#modes,#ctrls{position:static;margin:12px;width:auto;max-width:none}
+    body{overflow:auto}#stage{position:relative;height:62vh}.hint{display:none}}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div class="panel" id="modes">
+  <h1>Hover interaction lab</h1>
+  <p class="sub">Real hand cloud, real shader. Hover the hand to feel each one. <b>Reach</b> is a fraction of the handReal hand cloud, real shader. Move your cursor over the hand to feel each one.rsquo;s height &mdash; small values keep the effect local to your cursor.</p>
+  <div id="modeList"></div>
+</div>
+
+<div class="panel" id="ctrls">
+  <div class="row"><label>Reach</label><input type="range" id="sRadius" min="0.04" max="0.7" step="0.01" value="0.16"><output id="oRadius"></output></div>
+  <div class="row"><label>Push</label><input type="range" id="sStrength" min="0" max="1.6" step="0.05" value="0.6"><output id="oStrength"></output></div>
+  <div class="row"><label>Brightness</label><input type="range" id="sBright" min="0.1" max="1" step="0.02" value="0.42"><output id="oBright"></output></div>
+  <div class="row"><label>Dot size</label><input type="range" id="sSize" min="2" max="14" step="0.2" value="6.8"><output id="oSize"></output></div>
+  <div class="row"><label>Return</label><input type="range" id="sReturn" min="0.01" max="0.3" step="0.005" value="0.055"><output id="oReturn"></output></div>
+  <button id="copy">Copy these settings</button>
+</div>
+
+<p class="hint">Hover the hand &middot; drag to rotate</p>
+<p id="err">Could not load <code>assets/hand.glb</code>.<br>Open this page through the local server, not as a file://</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+/* Hand particle hover lab — standalone. Mirrors hand-scene.js sampling + shader,
+   with every candidate interaction switchable at runtime. */
+(function () {
+  'use strict';
+  var MODES = [
+    ['burst',    'Global burst (current)', 'What the site does today: whole cloud bursts by proximity. Cursor position only sets how much.'],
+    ['repel',    'A - Repulsion wake',     'Points near the cursor shove outward, carving a hole that heals behind you.'],
+    ['wind',     'A+B - Repulsion + wind', 'Repulsion plus a smear along your direction of travel. Flick fast, hit harder.'],
+    ['vortex',   'C - Vortex swirl',       'Points orbit tangentially around the cursor, twisting into a spiral.'],
+    ['gather',   'D - Magnetic gather',    'Points are pulled INTO the cursor, condensing to a knot, then spring back.'],
+    ['dissolve', 'E - Dissolve wipe',      'Points fade instead of moving - you erase the hand and it re-forms.']
+  ];
+  var MODE_IDX = {}; MODES.forEach(function (m, i) { MODE_IDX[m[0]] = i; });
+  var mode = 'repel';
+  var RETURN = 0.055;
+  var SPAN = 1, RADFRAC = 0.16;  // reach as a FRACTION of hand height
+
+  var cv = document.getElementById('stage');
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+  camera.position.z = 7;
+  var renderer = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  /* ---- same area-weighted sampler as the site ---- */
+  function collectTris(root) {
+    root.updateWorldMatrix(true, true);
+    var inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+    var recs = [], total = 0;
+    root.traverse(function (o) {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals();
+      var g = o.geometry;
+      var n = Math.floor((g.index ? g.index.count : g.attributes.position.count) / 3) * 3;
+      if (n) { recs.push({ o: o, n: n }); total += n; }
+    });
+    if (!total) return null;
+    var V = new Float32Array(total * 3), N = new Float32Array(total * 3), w = 0;
+    var v3 = new THREE.Vector3(), n3 = new THREE.Vector3();
+    recs.forEach(function (r) {
+      var g = r.o.geometry, pA = g.attributes.position, nA = g.attributes.normal, ix = g.index;
+      var m4 = new THREE.Matrix4().multiplyMatrices(inv, r.o.matrixWorld);
+      var m3 = new THREE.Matrix3().getNormalMatrix(m4);
+      for (var i = 0; i < r.n; i++) {
+        var vi = ix ? ix.getX(i) : i;
+        v3.fromBufferAttribute(pA, vi).applyMatrix4(m4);
+        n3.fromBufferAttribute(nA, vi).applyMatrix3(m3).normalize();
+        V[w] = v3.x; V[w+1] = v3.y; V[w+2] = v3.z;
+        N[w] = n3.x; N[w+1] = n3.y; N[w+2] = n3.z; w += 3;
+      }
+    });
+    return { V: V, N: N, triCount: total / 3 };
+  }
+
+  function sampleCloud(s, count) {
+    var V = s.V, N = s.N, tc = s.triCount, cum = new Float32Array(tc), total = 0;
+    var ab = new THREE.Vector3(), ac = new THREE.Vector3(), cr = new THREE.Vector3(), t, o;
+    for (t = 0; t < tc; t++) {
+      o = t * 9;
+      ab.set(V[o+3]-V[o], V[o+4]-V[o+1], V[o+5]-V[o+2]);
+      ac.set(V[o+6]-V[o], V[o+7]-V[o+1], V[o+8]-V[o+2]);
+      total += cr.crossVectors(ab, ac).length() * 0.5; cum[t] = total;
+    }
+    var pos = new Float32Array(count*3), nrm = new Float32Array(count*3),
+        rnd = new Float32Array(count*2), sct = new Float32Array(count*3);
+    for (var i = 0; i < count; i++) {
+      var r = Math.random() * total, lo = 0, hi = tc - 1;
+      while (lo < hi) { var mid = (lo+hi) >> 1; if (cum[mid] < r) lo = mid+1; else hi = mid; }
+      o = lo * 9;
+      var u = Math.random(), v = Math.random();
+      if (u + v > 1) { u = 1-u; v = 1-v; }
+      var a = 1-u-v, k = i*3;
+      pos[k]   = V[o]*a   + V[o+3]*u + V[o+6]*v;
+      pos[k+1] = V[o+1]*a + V[o+4]*u + V[o+7]*v;
+      pos[k+2] = V[o+2]*a + V[o+5]*u + V[o+8]*v;
+      nrm[k]   = N[o]*a   + N[o+3]*u + N[o+6]*v;
+      nrm[k+1] = N[o+1]*a + N[o+4]*u + N[o+7]*v;
+      nrm[k+2] = N[o+2]*a + N[o+5]*u + N[o+8]*v;
+      rnd[i*2] = Math.random(); rnd[i*2+1] = Math.random();
+      var sx = Math.random()*2-1, sy = Math.random()*2-1, sz = Math.random()*2-1;
+      var sl = Math.sqrt(sx*sx+sy*sy+sz*sz) || 1;
+      var mag = 0.35 + Math.random()*Math.random()*1.5;
+      sct[k]   = (sx/sl*0.75 + nrm[k]*0.65) * mag;
+      sct[k+1] = (sy/sl*0.75 + nrm[k+1]*0.65) * mag;
+      sct[k+2] = (sz/sl*0.75 + nrm[k+2]*0.65) * mag;
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('aNormal',  new THREE.BufferAttribute(nrm, 3));
+    g.setAttribute('aRand',    new THREE.BufferAttribute(rnd, 2));
+    g.setAttribute('aScatter', new THREE.BufferAttribute(sct, 3));
+    g.computeBoundingBox();
+    return g;
+  }
+
+  var mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor:{value:new THREE.Color(0xe8edf5)}, uTime:{value:0}, uSize:{value:6.8},
+      uDpr:{value:Math.min(devicePixelRatio,2)}, uJitter:{value:0}, uBurst:{value:0},
+      uScatter:{value:0}, uBright:{value:0.42}, uFadeMin:{value:0}, uFadeSpan:{value:1},
+      uOpacity:{value:1}, uMode:{value:1}, uCursor:{value:new THREE.Vector3(999,999,999)},
+      uVel:{value:new THREE.Vector3()}, uRadius:{value:0.9}, uStrength:{value:1}
+    },
+    vertexShader:[
+      'attribute vec3 aNormal;','attribute vec2 aRand;','attribute vec3 aScatter;',
+      'uniform float uTime,uSize,uDpr,uJitter,uBurst,uScatter,uRadius,uStrength;',
+      'uniform float uFadeMin,uFadeSpan;','uniform int uMode;',
+      'uniform vec3 uCursor,uVel;',
+      'varying float vTwinkle,vFade,vScat,vDim;',
+      'void main(){',
+      '  float ph=aRand.x*6.2831853;',
+      '  float n=sin(uTime*1.3+ph)*0.6+sin(uTime*0.71+ph*2.1)*0.4;',
+      '  vec3 p=position+aNormal*n*uJitter;',
+      '  vDim=0.0; vScat=0.0;',
+      '  if(uMode==0){',
+      '    float s=uScatter; vScat=s;',
+      '    vec3 sw=vec3(sin(uTime*1.1+ph*1.7),cos(uTime*0.9+ph*2.3),sin(uTime*1.4+ph));',
+      '    p+=aScatter*s*uBurst+sw*s*uBurst*0.22;',
+      '  } else {',
+      '    vec3 d=p-uCursor;',
+      '    float dist=length(d);',
+      '    float infl=1.0-smoothstep(0.0,uRadius,dist);',
+      '    infl=pow(infl,1.6);',
+      '    vScat=infl;',
+      '    vec3 dir=dist>0.0001?d/dist:vec3(0.0,1.0,0.0);',
+      '    float amp=uRadius*uStrength;',
+      '    if(uMode==1){',
+      '      p+=dir*infl*amp;',
+      '    } else if(uMode==2){',
+      '      p+=dir*infl*amp*0.75+uVel*infl*uStrength*2.2;',
+      '    } else if(uMode==3){',
+      '      vec3 ax=normalize(vec3(0.25,0.15,1.0));',
+      '      vec3 tang=normalize(cross(ax,dir)+vec3(1e-5));',
+      '      p+=tang*infl*amp*1.35+dir*infl*amp*0.28;',
+      '    } else if(uMode==4){',
+      '      p-=dir*infl*min(dist,amp);',
+      '    } else if(uMode==5){',
+      '      vDim=infl;',
+      '      p+=aNormal*infl*amp*0.08;',
+      '    }',
+      '  }',
+      '  vec4 mv=modelViewMatrix*vec4(p,1.0);',
+      '  vFade=smoothstep(uFadeMin,uFadeMin+uFadeSpan,position.y);',
+      '  vTwinkle=0.35+0.65*pow(0.5+0.5*sin(uTime*2.0+ph*3.0),2.0);',
+      '  gl_PointSize=uSize*uDpr*(0.55+aRand.y*0.9)*(3.0/-mv.z);',
+      '  gl_Position=projectionMatrix*mv;',
+      '}'
+    ].join('\n'),
+    fragmentShader:[
+      'uniform vec3 uColor;','uniform float uOpacity,uBright;',
+      'varying float vTwinkle,vFade,vScat,vDim;',
+      'void main(){',
+      '  vec2 c=gl_PointCoord-0.5; float d=length(c);',
+      '  if(d>0.5) discard;',
+      '  float soft=smoothstep(0.5,0.05,d);',
+      '  float a=soft*vTwinkle*vFade*uOpacity*uBright*(1.0+vScat*0.35)*(1.0-vDim*0.95);',
+      '  if(a<0.002) discard;',
+      '  gl_FragColor=vec4(uColor,a);',
+      '}'
+    ].join('\n'),
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+  });
+
+  var pts = null, wrap = new THREE.Group(), spin = new THREE.Group();
+  spin.add(wrap); scene.add(spin);
+
+  new THREE.GLTFLoader().load('assets/hand.glb', function (gltf) {
+    var soup = collectTris(gltf.scene);
+    var geo = sampleCloud(soup, 30000);
+    var gb = geo.boundingBox, span = (gb.max.y - gb.min.y) || 1;
+    mat.uniforms.uFadeMin.value = gb.min.y;
+    mat.uniforms.uFadeSpan.value = span * 0.3;
+    mat.uniforms.uJitter.value = span * 0.008;
+    mat.uniforms.uBurst.value = span * 0.20;
+    SPAN = span; applyRadius();
+    pts = new THREE.Points(geo, mat);
+    wrap.add(pts);
+    var box = new THREE.Box3().setFromObject(wrap);
+    var sz = box.getSize(new THREE.Vector3());
+    pts.scale.setScalar(3.9 / (Math.max(sz.x, sz.y, sz.z) || 1));
+    wrap.updateWorldMatrix(true, true);
+    box.setFromObject(wrap);
+    pts.position.sub(box.getCenter(new THREE.Vector3()));
+    resize();
+  }, undefined, function () { document.getElementById('err').style.display = 'block'; });
+
+  /* ---- cursor -> local space ---- */
+  var mouse = {x:-9999,y:-9999}, seen = false;
+  var worldCur = new THREE.Vector3(999,999,999), velWorld = new THREE.Vector3();
+  var drag = false, dragX = 0, spinY = 0, spinVel = 0;
+
+  function s2w(px,py){
+    var w = cv.clientWidth||1, h = cv.clientHeight||1;
+    var hh = Math.tan(camera.fov*Math.PI/360)*camera.position.z;
+    return new THREE.Vector3(((px/w)*2-1)*hh*camera.aspect, -((py/h)*2-1)*hh, 0);
+  }
+  addEventListener('pointermove', function(e){
+    var r = cv.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    if (drag) { spinVel += (e.clientX - dragX) * 0.0006; dragX = e.clientX; }
+  }, {passive:true});
+  cv.addEventListener('pointerdown', function(e){ drag = true; dragX = e.clientX; });
+  addEventListener('pointerup', function(){ drag = false; });
+
+  function resize(){
+    var w = cv.clientWidth||1, h = cv.clientHeight||1;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w,h,false);
+    mat.uniforms.uDpr.value = Math.min(devicePixelRatio,2);
+  }
+  addEventListener('resize', resize);
+
+  var hoverN = 0, t = 0, last = performance.now();
+  var tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
+
+  function loop(now){
+    requestAnimationFrame(loop);
+    var dt = Math.min(50, now - last); last = now; t += dt/1000;
+    mat.uniforms.uTime.value = t;
+
+    spinVel *= 0.94; spinY += spinVel + 0.0016;
+    spin.rotation.y = spinY;
+
+    var onScreen = mouse.x > -9998;
+    if (onScreen) {
+      var w = s2w(mouse.x, mouse.y);
+      if (seen) velWorld.set(w.x - worldCur.x, w.y - worldCur.y, 0);
+      worldCur.copy(w); seen = true;
+    } else {
+      velWorld.multiplyScalar(0.85);
+    }
+
+    if (pts) {
+      if (mode === 'burst') {
+        var ht = 0;
+        if (onScreen) {
+          var dx = worldCur.x, dy = worldCur.y * 0.55;
+          var d = Math.sqrt(dx*dx + dy*dy);
+          ht = 1 - Math.min(1, Math.max(0, (d - 0.9) / (1.9 - 0.9)));
+        }
+        hoverN += (ht - hoverN) * (ht > hoverN ? 0.16 : RETURN);
+        mat.uniforms.uScatter.value = hoverN*hoverN*(3 - 2*hoverN);
+      } else if (onScreen) {
+        tmp.copy(worldCur); pts.worldToLocal(tmp);
+        mat.uniforms.uCursor.value.copy(tmp);
+        tmp2.copy(worldCur).add(velWorld); pts.worldToLocal(tmp2);
+        mat.uniforms.uVel.value.set(tmp2.x - tmp.x, tmp2.y - tmp.y, tmp2.z - tmp.z);
+      } else {
+        mat.uniforms.uCursor.value.set(999,999,999);
+        mat.uniforms.uVel.value.multiplyScalar(0.85);
+      }
+    }
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(loop);
+
+  /* ---- UI ---- */
+  var list = document.getElementById('modeList');
+  MODES.forEach(function(m){
+    var b = document.createElement('button');
+    b.className = 'mode' + (m[0] === mode ? ' on' : '');
+    b.innerHTML = '<b>' + m[1] + '</b><span>' + m[2] + '</span>';
+    b.onclick = function(){
+      mode = m[0];
+      mat.uniforms.uMode.value = MODE_IDX[m[0]];
+      mat.uniforms.uScatter.value = 0; hoverN = 0;
+      [].forEach.call(list.children, function(c){ c.classList.remove('on'); });
+      b.classList.add('on');
+    };
+    list.appendChild(b);
+  });
+  mat.uniforms.uMode.value = MODE_IDX[mode];
+  window.__lab = { scene: scene, mat: mat, camera: camera, spin: spin,
+    pts: function () { return pts; },
+    setMode: function (m) { mode = m; mat.uniforms.uMode.value = MODE_IDX[m]; } };
+
+  function applyRadius(){ mat.uniforms.uRadius.value = RADFRAC * SPAN; }
+
+  function bind(id, uni, out, fix, cb){
+    var s = document.getElementById(id), o = document.getElementById(out);
+    function up(){
+      var v = parseFloat(s.value);
+      o.textContent = v.toFixed(fix);
+      if (uni) mat.uniforms[uni].value = v;
+      if (cb) cb(v);
+    }
+    s.addEventListener('input', up); up();
+  }
+  bind('sRadius',null,'oRadius',2,function(v){ RADFRAC = v; applyRadius(); });
+  bind('sStrength','uStrength','oStrength',2);
+  bind('sBright','uBright','oBright',2);
+  bind('sSize','uSize','oSize',1);
+  bind('sReturn',null,'oReturn',3,function(v){ RETURN = v; });
+
+  document.getElementById('copy').onclick = function(){
+    var txt = 'mode: ' + mode
+      + '\nuRadius: ' + mat.uniforms.uRadius.value
+      + '\nuStrength: ' + mat.uniforms.uStrength.value
+      + '\nuBright: ' + mat.uniforms.uBright.value
+      + '\nuSize: ' + mat.uniforms.uSize.value
+      + '\nreturnEase: ' + RETURN;
+    var ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+    this.textContent = 'Copied — paste it to Claude';
+    var self = this;
+    setTimeout(function(){ self.textContent = 'Copy these settings'; }, 1800);
+  };
+  resize();
+})();
+</script>
+</body>
+</html>

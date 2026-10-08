@@ -1,0 +1,1232 @@
+/* ==========================================================================
+   MUHAMMED HANAN — hanan.in
+   Phase 1: base styles, typography, layout, glassmorphism, responsive
+   ========================================================================== */
+
+/* ---------- Self-hosted display font ----------
+   General Sans — ITF Free Font License, via Fontshare. Served from our own
+   /assets so rendering is identical on localhost, Netlify, and behind any
+   browser shield/blocker (third-party CDN fetches can be blocked or slow,
+   which silently falls back to a system font and changes the weight/look). */
+@font-face {
+  font-family: 'General Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('assets/fonts/general-sans-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'General Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('assets/fonts/general-sans-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'General Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('assets/fonts/general-sans-700.woff2') format('woff2');
+}
+
+/* ---------- Tokens ---------- */
+:root {
+  --font-display: 'General Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* pure black theme — matches the globe scene for a seamless handoff */
+  --bg: #000000;
+  --ink: #F0F2F5;
+  --muted: #8B929E;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 16px;
+  --radius-card: 20px;
+  --radius-pill: 100px;
+  --container-max: 1440px;
+  --header-h: 88px;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-padding-top: calc(var(--header-h) + 8px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  background-color: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- Noise grain overlay ---------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Utilities ---------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 64px);
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 400;
+  padding: 10px 18px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transform: translateY(-300%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  color: var(--bg);
+}
+
+/* ---------- Glass recipes ---------- */
+.glass-card {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--glass-border);
+  border-radius: var(--radius-card);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 30px;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.btn-glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--glass-border);
+  color: var(--ink);
+}
+
+.btn-glass:hover,
+.btn-glass:focus-visible {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.btn-text:hover,
+.btn-text:focus-visible {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* ---------- Loading screen (shown only once Phase 2 JS adds .js to <html>) ---------- */
+.loading-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #000000; /* matches the globe scene it reveals */
+  align-items: center;
+  justify-content: center;
+}
+
+.js .loading-screen {
+  display: flex;
+}
+
+.loading-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.loading-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-track,
+.ring-fill {
+  fill: none;
+  stroke-width: 3;
+}
+
+.ring-track {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.ring-fill {
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-dasharray: 339.292;
+  /* start empty to match the 0% in the markup. The loader only ever renders
+     with JS on (.js gate above), and main.js animates 0→100 from here — so a
+     full ring / "100%" default could only ever be seen as a flash before the
+     first tween frame landed. */
+  stroke-dashoffset: 339.292;
+}
+
+.loading-count {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+/* ---------- Header / nav ---------- */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition: background-color 0.3s ease;
+}
+
+.header-inner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding: 24px clamp(20px, 5vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Glass state toggled by JS past 80px scroll (Phase 2) */
+.site-header.scrolled {
+  background: rgba(0, 0, 0, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.logo:hover,
+.logo:focus-visible {
+  color: var(--ink);
+  opacity: 0.7;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 3vw, 48px);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 2.5vw, 40px);
+}
+
+.nav-link {
+  position: relative;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  padding: 6px 0;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translateY(-50%) scale(0);
+  transition: transform 0.25s ease;
+}
+
+.nav-link.active::before {
+  transform: translateY(-50%) scale(1);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--ink);
+  opacity: 0.6;
+}
+
+.nav-cta {
+  padding: 11px 24px;
+  font-size: 0.85rem;
+}
+
+.nav-toggle {
+  display: none;
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.nav-toggle-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--ink);
+  transition: transform 0.3s ease;
+}
+
+.nav-open .nav-toggle .nav-toggle-line:nth-child(1) {
+  transform: translateY(4.5px) rotate(45deg);
+}
+
+.nav-open .nav-toggle .nav-toggle-line:nth-child(2) {
+  transform: translateY(-4.5px) rotate(-45deg);
+}
+
+/* ---------- Decorative hands layer (behind everything; choreography in Phase 2) ---------- */
+.hands-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.hand {
+  position: absolute;
+  top: 50%;
+  width: clamp(220px, 26vw, 400px);
+  color: var(--ink);
+  opacity: 0.1;
+  filter: blur(5px);
+}
+
+.hand-left {
+  left: 57%;
+  transform: translateY(-50%);
+}
+
+.hand-right {
+  right: 57%;
+  transform: translateY(-50%) scaleX(-1);
+  opacity: 0; /* revealed at Contact by Phase 2 animation */
+}
+
+/* 3D hand mode (hand-scene.js adds .hand3d once assets/hand.glb loads) */
+.hand3d .hand {
+  display: none;
+}
+
+.hands-layer canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Sections: shared ---------- */
+.section {
+  padding: clamp(96px, 13vh, 160px) 0;
+}
+
+.section-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.section-heading {
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  margin-bottom: clamp(36px, 5vh, 56px);
+  max-width: 22ch;
+}
+
+/* ---------- Section 0: globe (pure black scene, full viewport) ---------- */
+.globe-section {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #000000;
+}
+
+/* soft atmosphere glow behind the sphere */
+.globe-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.09), transparent 55%);
+}
+
+/* vignette for depth */
+.globe-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.globe-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* fly-through fade into the light page (driven by globe.js) */
+.globe-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* scroll cue: cascading chevrons, centred at the bottom of the globe frame */
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(24px, 5vh, 48px);
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+/* JS adds .is-hidden the moment scrolling begins */
+.scroll-cue.is-hidden {
+  opacity: 0;
+}
+
+/* the label is also a <span>, so the chevron rule must exclude it — and the
+   chevrons are now children 2-4, not 1-3 */
+.scroll-cue span:not(.cue-label) {
+  width: 12px;
+  height: 12px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(45deg);
+  opacity: 0.18;
+  animation: cue-chevron 1.8s ease-in-out infinite;
+}
+
+.scroll-cue span:nth-child(3) { animation-delay: 0.2s; }
+.scroll-cue span:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes cue-chevron {
+  0%, 60%, 100% { opacity: 0.18; }
+  30% { opacity: 0.9; }
+}
+
+/* micro-label above the chevrons — echoes the hero .tag-line tracking so it
+   reads as part of the same type system, at a whisper */
+.cue-label {
+  margin-bottom: 5px;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  /* trailing letter-space would otherwise push the word optically left */
+  text-indent: 0.22em;
+  color: var(--muted);
+  opacity: 0.75;
+  animation: cue-label 1.8s ease-in-out infinite;
+}
+
+/* the "very slight" highlight: lifts toward --ink just ahead of the chevron
+   cascade, so label and arrows read as one gesture rather than two loops */
+@keyframes cue-label {
+  0%, 60%, 100% { color: var(--muted); opacity: 0.75; }
+  30% { color: var(--ink); opacity: 1; }
+}
+
+/* reduced motion: static, visible, no bounce */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue span:not(.cue-label) {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .cue-label {
+    animation: none;
+    color: var(--ink);
+    opacity: 0.85;
+  }
+}
+
+/* desktop: the globe renders full-size and fills the bottom-centre, so move
+   the cue into the empty right margin. Portrait/mobile (globe shrunk) keep the
+   centred rule above — scoped to landscape so the overlap case is what triggers it. */
+@media (min-width: 768px) and (min-aspect-ratio: 1/1) {
+  .scroll-cue {
+    left: auto;
+    transform: none;
+    right: clamp(28px, 3.5vw, 56px);
+    bottom: clamp(28px, 5vh, 52px);
+  }
+}
+
+/* ---------- Section 1: hero ---------- */
+.hero {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: calc(var(--header-h) + 24px) 0 64px;
+  /* rides up over the pinned globe: the fly-through lands straight in the hero */
+  position: relative;
+  z-index: 2;
+  margin-top: -100vh;
+  margin-top: -100svh;
+}
+
+.hero-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* centered, no panel — type owns the screen */
+.hero-copy {
+  max-width: 1060px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.tag-line {
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.hero-headline {
+  font-size: clamp(3rem, 6.8vw, 5.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  margin-bottom: 10px;
+}
+
+/* big muted second line, ANAS-style two-tone */
+.hero-sub {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3.4vw, 2.9rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--muted);
+  max-width: 26ch;
+  margin-inline: auto;
+  margin-bottom: 44px;
+}
+
+.hero-ctas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.trust-line {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------- Section 2: work ---------- */
+/* Three across, sized to fit — no scrolling while the set is small.
+   WHEN THERE ARE MORE PROJECTS: swap this back to a horizontal snap-rail —
+   display:flex + overflow-x:auto + scroll-snap-type:x mandatory, cards at
+   flex:0 0 clamp(280px,78vw,500px) + scroll-snap-align:start. That rail also
+   needs padding-bottom ~46px (overflow-y would otherwise clip the 36px
+   scroll-reveal tween) and data-lenis-prevent-wheel on the element, or Lenis
+   swallows sideways trackpad swipes. */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 2vw, 28px);
+  align-items: stretch;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  /* tighter than the other glass cards: three tiles share a row, so heavy
+     padding would eat the width the copy needs */
+  padding: clamp(24px, 2.4vw, 34px);
+}
+
+/* pin the link + result line to the card bottom so both cards align */
+.project-card .tag-list {
+  margin-top: auto;
+}
+
+.project-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.project-name {
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  margin-bottom: 18px;
+}
+
+.project-desc {
+  color: var(--muted);
+  max-width: 65ch;
+  margin-bottom: 28px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.tag-pill {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--glass-border);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.project-link {
+  margin-bottom: 28px;
+}
+
+.project-result {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.work-note {
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- Section 3: services ---------- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.service-card {
+  padding: clamp(30px, 3.5vw, 44px);
+}
+
+.accent-line {
+  display: block;
+  width: 34px;
+  height: 3px;
+  background: var(--ink);
+  margin-bottom: 26px;
+}
+
+.service-title {
+  font-size: 1.15rem;
+  margin-bottom: 14px;
+}
+
+.service-desc {
+  color: var(--muted);
+  font-size: 0.98rem;
+  max-width: 48ch;
+}
+
+/* ---------- Section 4: about ---------- */
+.about-body p {
+  max-width: 65ch;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 1.25em;
+}
+
+.about-tagline {
+  font-size: 1.15rem;
+  max-width: 34ch;
+  margin: 40px 0 28px;
+}
+
+.about-cta {
+  font-size: 1.05rem;
+}
+
+/* ---------- Section 5: testimonial ---------- */
+.quote-card {
+  max-width: 840px;
+  margin-inline: auto;
+  padding: clamp(40px, 6vw, 72px);
+  text-align: center;
+}
+
+.quote-card::before {
+  content: '\201C';
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(4.5rem, 9vw, 7rem);
+  line-height: 0.7;
+  color: rgba(255, 255, 255, 0.14);
+  margin-bottom: 18px;
+}
+
+.quote-text p {
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.quote-attr {
+  margin-top: 28px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ---------- Section 6: contact ---------- */
+.contact-sub {
+  color: var(--muted);
+  margin-top: -24px;
+  margin-bottom: clamp(36px, 5vh, 56px);
+  font-size: 1.05rem;
+}
+
+/* stage where the hands flank the connect button */
+.contact-stage {
+  position: relative;
+  min-height: clamp(320px, 52vh, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: clamp(48px, 7vh, 88px);
+}
+
+.connect-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(132px, 15vw, 172px);
+  height: clamp(132px, 15vw, 172px);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--glass-border);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.connect-btn::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: inset 0.35s ease, border-color 0.35s ease;
+}
+
+.connect-btn:hover,
+.connect-btn:focus-visible {
+  background: var(--ink);
+  color: var(--bg);
+  transform: scale(1.06);
+  box-shadow: 0 0 60px rgba(240, 242, 245, 0.12);
+}
+
+.connect-btn:hover::before,
+.connect-btn:focus-visible::before {
+  inset: -22px;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(32px, 4vw, 64px);
+  align-items: start;
+}
+
+.contact-options {
+  display: grid;
+  gap: 16px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 28px;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.contact-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: var(--ink);
+}
+
+.contact-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.contact-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.contact-value {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.contact-message p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 42ch;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 44px 0;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer-copy {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ink);
+  text-align: center;
+}
+
+.footer-social {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.footer-social-link svg {
+  width: 22px;
+  height: 22px;
+}
+
+.footer-social-link:hover,
+.footer-social-link:focus-visible {
+  color: var(--ink);
+}
+
+/* ---------- Custom cursor (element injected in Phase 2; styles ready) ---------- */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-dot.is-hovering {
+  width: 40px;
+  height: 40px;
+  background: rgba(240, 242, 245, 0.1);
+}
+
+/* ---------- Responsive: tablet (768–1199) ---------- */
+@media (max-width: 1199px) {
+  .hand-left {
+    left: 62%;
+  }
+
+  /* three tiles get cramped below 1200 — drop to two, and let an odd final
+     card span the row rather than sit alone at half width */
+  .work-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .work-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .work-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Responsive: mobile (<768) ---------- */
+@media (max-width: 767px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .site-nav {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 36px;
+    background: rgba(0, 0, 0, 0.92);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .nav-open .site-nav {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .nav-link {
+    font-size: 1.15rem;
+    padding: 12px 24px; /* ≥44px touch target in the fullscreen menu */
+  }
+
+  .nav-link::before {
+    left: 4px;
+  }
+
+  /* comfortable tap area for text CTAs on touch */
+  .btn-text {
+    padding: 8px 4px;
+  }
+
+  .section {
+    padding: 88px 0;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: calc(var(--header-h) + 8px);
+  }
+
+  .hero-ctas {
+    gap: 18px;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+
+  .footer-social {
+    justify-content: center;
+  }
+
+  .hand {
+    width: clamp(180px, 44vw, 260px);
+  }
+
+  .hand-left {
+    left: 55%;
+  }
+}
+
+/* ==========================================================================
+   Phase 2 — interaction support styles
+   ========================================================================== */
+
+/* Headline character splitting (spans injected by main.js) */
+.hero-headline .word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.hero-headline .char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Custom cursor replaces the native one on precise pointers only */
+@media (pointer: fine) {
+  .js.cursor-active body,
+  .js.cursor-active a,
+  .js.cursor-active button {
+    cursor: none;
+  }
+}
+
+.cursor-dot {
+  width: 14px;
+  height: 14px;
+  transition: width 0.25s ease, height 0.25s ease, background-color 0.25s ease, opacity 0.25s ease;
+  will-change: transform;
+  opacity: 0;
+}
+
+.cursor-dot.is-visible {
+  opacity: 1;
+}
+
+/* Touch tap ripple */
+.tap-ripple {
+  position: fixed;
+  z-index: 500;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: tap-ripple 0.55s ease-out forwards;
+}
+
+@keyframes tap-ripple {
+  from {
+    transform: scale(0.25);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Globe interaction affordance */
+.globe-section {
+  cursor: grab;
+}
+
+.globe-section:active {
+  cursor: grabbing;
+}
+
+/* Loading screen fade handled by GSAP; keep it above everything while active */
+.loading-screen.is-done {
+  display: none;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
